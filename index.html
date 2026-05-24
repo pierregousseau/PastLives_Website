@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pastlives</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #05040a;
+      --bg2:       #0c0b14;
+      --surface:   #12111e;
+      --gold:      #c9a84c;
+      --gold-dim:  #7a5f2a;
+      --crimson:   #8b1a1a;
+      --crimson2:  #c0392b;
+      --text:      #d4ccbb;
+      --muted:     #7a7264;
+      --white:     #f0ece0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.7;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.45;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: linear-gradient(to bottom, rgba(5,4,10,0.95), transparent);
+      backdrop-filter: blur(4px);
+    }
+
+    .nav-logo {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.2em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      padding: 6rem 2rem 4rem;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 40%, rgba(139,26,26,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 100% 80% at 50% 100%, rgba(201,168,76,0.07) 0%, transparent 60%),
+        linear-gradient(180deg, #05040a 0%, #0c0918 50%, #05040a 100%);
+    }
+
+    /* Animated embers */
+    .embers {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .ember {
+      position: absolute;
+      bottom: -10px;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px 2px rgba(201,168,76,0.6);
+      animation: rise var(--dur) ease-in infinite;
+      animation-delay: var(--delay);
+      left: var(--x);
+      opacity: 0;
+    }
+
+    @keyframes rise {
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      10%  { opacity: 1; }
+      80%  { opacity: 0.6; }
+      100% { transform: translateY(-80vh) translateX(var(--drift)) scale(0.2); opacity: 0; }
+    }
+
+    /* Divider rune */
+    .rune-divider {
+      color: var(--gold-dim);
+      font-size: 1.4rem;
+      letter-spacing: 0.8em;
+      margin: 1rem 0;
+      opacity: 0.7;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      animation: fadeUp 1s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(3rem, 10vw, 8rem);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1;
+      text-shadow:
+        0 0 80px rgba(201,168,76,0.25),
+        0 0 200px rgba(139,26,26,0.3);
+      animation: fadeUp 1s 0.2s ease both;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-title span {
+      display: block;
+      font-size: 0.55em;
+      color: var(--gold);
+      letter-spacing: 0.3em;
+      margin-top: 0.3em;
+    }
+
+    .hero-sub {
+      max-width: 580px;
+      margin: 2rem auto 2.5rem;
+      font-size: 1.1rem;
+      color: var(--muted);
+      font-style: italic;
+      animation: fadeUp 1s 0.4s ease both;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      padding: 1rem 2.8rem;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.4s;
+      animation: fadeUp 1s 0.6s ease both;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: translateX(-101%);
+      transition: transform 0.4s cubic-bezier(0.77,0,0.18,1);
+    }
+
+    .btn-primary:hover { color: var(--bg); }
+    .btn-primary:hover::before { transform: translateX(0); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      animation: fadeUp 1s 1s ease both;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(to bottom, var(--gold-dim), transparent);
+      animation: scrollPulse 2s ease infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    /* ── STORY ── */
+    #story {
+      position: relative;
+      padding: 8rem 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      color: var(--white);
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(to right, var(--gold), transparent);
+      margin-top: 1rem;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.9;
+      color: var(--text);
+    }
+
+    .story-text p + p { margin-top: 1.5rem; }
+
+    .story-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .story-art {
+      position: relative;
+    }
+
+    .story-art-box {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background:
+        linear-gradient(135deg, rgba(139,26,26,0.3) 0%, rgba(201,168,76,0.05) 100%),
+        var(--surface);
+      border: 1px solid rgba(201,168,76,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .story-art-box::before {
+      content: '⚔';
+      font-size: 6rem;
+      opacity: 0.08;
+      color: var(--gold);
+      position: absolute;
+    }
+
+    .story-art-box img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    /* ── BACK TO TOP ── */
+    #back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 200;
+      width: 46px;
+      height: 46px;
+      background: var(--surface);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+    }
+
+    #back-to-top.visible {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    #back-to-top:hover {
+      background: var(--gold);
+      color: var(--bg);
+      box-shadow: 0 0 20px rgba(201,168,76,0.4);
+    }
+
+    .art-corner {
+      position: absolute;
+      width: 20px; height: 20px;
+      border-color: var(--gold-dim);
+      border-style: solid;
+      opacity: 0.6;
+    }
+
+    .art-corner.tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+    .art-corner.tr { top: 10px; right: 10px; border-width: 1px 1px 0 0; }
+    .art-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 1px 1px; }
+    .art-corner.br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+
+    /* ── FEATURES ── */
+    #features {
+      background: var(--bg2);
+      padding: 6rem 2rem;
+      border-top: 1px solid rgba(201,168,76,0.08);
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+    }
+
+    .features-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-top: 4rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      padding: 3rem 2rem;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .feature-card:hover { background: #1a1828; }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      filter: sepia(1) hue-rotate(-10deg) saturate(3);
+    }
+
+    .feature-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .feature-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── TEAM ── */
+    #team {
+      padding: 8rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    .member-card {
+      background: var(--surface);
+      border: 1px solid rgba(201,168,76,0.1);
+      padding: 2.5rem;
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 2rem;
+      align-items: start;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .member-card:hover {
+      border-color: rgba(201,168,76,0.35);
+      transform: translateY(-3px);
+    }
+
+    .member-avatar {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, var(--crimson) 0%, #2a1a3e 100%);
+      border: 1px solid rgba(201,168,76,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .member-avatar img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    .member-info {}
+
+    .member-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      color: var(--white);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.3rem;
+    }
+
+    .member-role {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .member-bio {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── DOWNLOAD ── */
+    #download {
+      position: relative;
+      padding: 8rem 2rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #download::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(139,26,26,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .download-inner { position: relative; max-width: 700px; margin: 0 auto; }
+
+    .download-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+
+    .download-sub {
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 3rem;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1.1rem 3rem;
+      background: linear-gradient(135deg, var(--crimson) 0%, #5a1010 100%);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--white);
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 0 40px rgba(139,26,26,0.4);
+    }
+
+    .btn-download:hover {
+      background: linear-gradient(135deg, var(--crimson2) 0%, var(--crimson) 100%);
+      box-shadow: 0 0 60px rgba(139,26,26,0.7);
+      transform: translateY(-2px);
+    }
+
+    .btn-pdf {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1.1rem 3rem;
+      background: transparent;
+      border: 1px solid rgba(201,168,76,0.4);
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+
+    .btn-pdf:hover {
+      background: rgba(201,168,76,0.08);
+      border-color: var(--gold);
+      box-shadow: 0 0 30px rgba(201,168,76,0.15);
+      transform: translateY(-2px);
+    }
+
+    .download-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ── RESOURCES ── */
+    #resources {
+      padding: 6rem 2rem;
+      background: var(--bg2);
+      border-top: 1px solid rgba(201,168,76,0.08);
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+    }
+
+    .resources-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .resources-groups {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3.5rem;
+    }
+
+    .resource-group-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+
+    .resource-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .resource-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid rgba(201,168,76,0.08);
+      color: var(--text);
+      text-decoration: none;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .resource-link::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--gold-dim);
+      transition: background 0.25s;
+    }
+
+    .resource-link:hover {
+      border-color: rgba(201,168,76,0.3);
+      background: #1a1828;
+      transform: translateX(4px);
+    }
+
+    .resource-link:hover::before {
+      background: var(--gold);
+    }
+
+    .resource-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+    }
+
+    .resource-info {}
+
+    .resource-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      display: block;
+    }
+
+    .resource-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .resource-arrow {
+      margin-left: auto;
+      color: var(--gold-dim);
+      font-size: 0.75rem;
+      transition: color 0.25s, transform 0.25s;
+      flex-shrink: 0;
+    }
+
+    .resource-link:hover .resource-arrow {
+      color: var(--gold);
+      transform: translateX(3px);
+    }
+
+    @media (max-width: 768px) {
+      .resources-groups { grid-template-columns: 1fr; }
+      .download-btns { flex-direction: column; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #030208;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      padding: 4rem 2rem 2rem;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 3rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+      margin-bottom: 2rem;
+    }
+
+    .footer-logo {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.3rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .footer-heading {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .footer-contact a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    .footer-contact a:hover { color: var(--gold); }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .social-link {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(201,168,76,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-family: 'Cinzel', serif;
+      transition: all 0.3s;
+    }
+
+    .social-link:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201,168,76,0.05);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.05em;
+    }
+
+    .footer-links { display: flex; gap: 2rem; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.75rem; transition: color 0.3s; }
+    .footer-links a:hover { color: var(--gold); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .story-layout { grid-template-columns: 1fr; }
+      .story-art { order: -1; }
+      .story-art-box { aspect-ratio: 16/9; }
+      .features-grid { grid-template-columns: 1fr; gap: 2px; }
+      .team-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#hero">PASTLIVES</a>
+    <ul class="nav-links">
+      <li><a href="#story">Histoire</a></li>
+      <li><a href="#team">Équipe</a></li>
+      <li><a href="#download">Télécharger</a></li>
+      <li><a href="#resources">Ressources</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="embers" id="embers"></div>
+
+    <p class="hero-eyebrow">PastLives Studio · Dark Fantasy Rogue-lite</p>
+    <h1 class="hero-title">
+      PAST LIVES
+      <span>Souviens-toi. Reviens. Survis.</span>
+    </h1>
+    <p class="hero-sub">
+      Plongez dans un univers Dark Fantasy où vos souvenirs sont votre seule arme.
+      Mourir n'est pas une fin — c'est le début de votre légende.
+    </p>
+    <a class="btn-primary" href="#download">Jouer maintenant</a>
+
+    <div class="scroll-hint">
+      <span>Défiler</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section id="story">
+    <div class="story-layout">
+      <div class="story-text reveal">
+        <p class="section-label">Lore</p>
+        <h2 class="section-title">L'Histoire</h2>
+        <div class="story-text">
+          <p>
+            Notre jeu est un Rogue-lite dont le mécanisme central repose sur une vérité implacable :
+            mourir pour devenir plus fort. Le personnage se réveille, perdu et sans aucun souvenir,
+            dans un endroit sombre et lugubre.
+          </p>
+          <p>
+            Face à lui, deux gobelins armés s'approchent. Trop faible, il échoue. Mais il se réveille
+            une nouvelle fois — plus fort, plus résistant. Cette fois, il parvient à les vaincre.
+          </p>
+          <p>
+            Après le didacticiel, le joueur découvre une ville détruite, gardée par un seul habitant :
+            un gobelin pacifique ayant renié sa nature. Quatre châteaux l'attendent, chacun avec son
+            thème, ses ennemis, ses boss, et ses secrets.
+          </p>
+          <p>
+            L'objectif est clair — franchir les murailles et découvrir la vérité sur son identité.
+          </p>
+        </div>
+      </div>
+
+      <div class="story-art reveal">
+        <div class="story-art-box">
+          <img src = 'gameplay.png'></img>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="features-inner">
+      <p class="section-label reveal">Mécaniques</p>
+      <h2 class="section-title reveal" style="display:inline-block">Forges ton destin</h2>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <span class="feature-icon">💀</span>
+          <p class="feature-title">Rogue-lite</p>
+          <p class="feature-desc">Chaque mort te rend plus puissant. Les souvenirs de tes vies passées deviennent ta force.</p>
+        </div>
+        <div class="feature-card reveal">
+          <span class="feature-icon">⚔️</span>
+          <p class="feature-title">Arsenal varié</p>
+          <p class="feature-desc">Mêlée ou distance — chaque choix d'arme façonne ton style de jeu et ta stratégie.</p>
+        </div>
+        <div class="feature-card reveal">
+          <span class="feature-icon">🏰</span>
+          <p class="feature-title">4 Châteaux</p>
+          <p class="feature-desc">Quatre donjons uniques avec leurs thèmes, boss redoutables et récompenses légendaires.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section id="team">
+    <p class="section-label reveal">Créateurs</p>
+    <h2 class="section-title reveal">L'Équipe PANTP</h2>
+    <p class="reveal" style="max-width:600px; color:var(--muted); font-style:italic; margin-bottom:1rem;">
+      Réunis par la passion du jeu vidéo et de l'univers Dark Fantasy, nous construisons
+      ensemble un monde qui nous habite.
+    </p>
+
+    <div class="team-grid">
+
+      <div class="member-card reveal">
+        <div class="member-avatar">
+		<img src="Pierre G.jpeg"></img>
+		
+		</div>
+        <div class="member-info">
+          <p class="member-name">Pierre Gousseau</p>
+          <p class="member-role">Développeur</p>
+          <p class="member-bio">Découvreur de Python et de Pygame, Pierre traduit les idées créatives en code robuste. Son goût pour le développement web enrichit l'architecture technique du projet.</p>
+        </div>
+      </div>
+
+      <div class="member-card reveal">
+        <div class="member-avatar">
+		<img src = "Philippe Z.jpeg">
+		
+		</div>
+        <div class="member-info">
+          <p class="member-name">Philippe Zhu</p>
+          <p class="member-role">Développeur</p>
+          <p class="member-bio">Riche d'une expérience variée en NSI — sites web, jeux, bases de données — Philippe apporte sa polyvalence technique pour pousser le projet à un niveau supérieur.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section id="download">
+    <div class="download-inner reveal">
+      <p class="section-label">Accès aux fichiers</p>
+      <h2 class="download-title">Télécharge Past Lives</h2>
+      <p class="download-sub">Accédez à la dernière version stable et aux documents de soutenance.</p>
+      <div class="download-btns">
+        <a class="btn-download" href="PastLives.zip" download="PastLives.zip">
+          ⬇ Télécharger .ZIP
+        </a>
+        <a class="btn-pdf" href="RDP_D1.2_G4_PANTP_PastLives.pdf" download="RDP_D1.2_G4_PANTP_PastLives.pdf" about='blank'>
+          📄 Rapport de soutenance .PDF
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section id="resources">
+    <div class="resources-inner">
+      <p class="section-label reveal">Crédits techniques</p>
+      <h2 class="section-title reveal">Ressources utilisées</h2>
+
+      <div class="resources-groups">
+
+        <div class="reveal">
+          <p class="resource-group-title">🎨 Outils de création</p>
+          <div class="resource-list">
+            <a class="resource-link" href="https://orama-interactive.itch.io/pixelorama" target="_blank" rel="noopener">
+              <span class="resource-icon">🖌️</span>
+              <span class="resource-info">
+                <span class="resource-name">Pixelorama</span>
+                <span class="resource-desc">Éditeur de pixel art open-source</span>
+              </span>
+              <span class="resource-arrow">→</span>
+            </a>
+            <a class="resource-link" href="https://www.mapeditor.org" target="_blank" rel="noopener">
+              <span class="resource-icon">🗺️</span>
+              <span class="resource-info">
+                <span class="resource-name">Tiled Map Editor</span>
+                <span class="resource-desc">Éditeur de cartes 2D pour les niveaux</span>
+              </span>
+              <span class="resource-arrow">→</span>
+            </a>
+            <a class="resource-link" href="https://ldtk.io" target="_blank" rel="noopener">
+              <span class="resource-icon">🏗️</span>
+              <span class="resource-info">
+                <span class="resource-name">LDtk</span>
+                <span class="resource-desc">Éditeur de niveaux 2D moderne et intuitif</span>
+              </span>
+              <span class="resource-arrow">→</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <p class="resource-group-title">🐍 Bibliothèques Python</p>
+          <div class="resource-list">
+            <a class="resource-link" href="https://www.pygame.org" target="_blank" rel="noopener">
+              <span class="resource-icon">🎮</span>
+              <span class="resource-info">
+                <span class="resource-name">Pygame</span>
+                <span class="resource-desc">Moteur de jeu 2D en Python</span>
+              </span>
+              <span class="resource-arrow">→</span>
+            </a>
+            <a class="resource-link" href="https://github.com/bitcraft/pyscroll" target="_blank" rel="noopener">
+              <span class="resource-icon">📜</span>
+              <span class="resource-info">
+                <span class="resource-name">PyScroll</span>
+                <span class="resource-desc">Rendu de maps avec scrolling fluide</span>
+              </span>
+              <span class="resource-arrow">→</span>
+            </a>
+            <a class="resource-link" href="https://github.com/bitcraft/pytmx" target="_blank" rel="noopener">
+              <span class="resource-icon">🧩</span>
+              <span class="resource-info">
+                <span class="resource-name">PyTMX</span>
+                <span class="resource-desc">Chargement des maps Tiled en Python</span>
+              </span>
+              <span class="resource-arrow">→</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+
+        <div>
+          <p class="footer-logo">PASTLIVES</p>
+          <p class="footer-tagline">Studio de jeu vidéo indépendant repoussant les limites de l'immersion narrative.</p>
+        </div>
+
+        <div>
+          <p class="footer-heading">Contact</p>
+          <div class="footer-contact">
+            <a href="mailto:pastlives-studio@gmail.com">pastlives-studio@gmail.com</a><br>
+            <span style="color:var(--muted);font-size:0.85rem;">Paris, France</span>
+          </div>
+        </div>
+
+        
+	  <br>
+      <div class="footer-bottom">
+        <span>© 2026 PastLives Studio. Tous droits réservés.</span>
+        
+      </div>
+    </div>
+  </footer>
+
+  <!-- BACK TO TOP -->
+  <button id="back-to-top" title="Retour en haut">↑</button>
+
+  <script>
+    // Back to top
+    const btt = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+      btt.classList.toggle('visible', window.scrollY > 400);
+    });
+    btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // Embers
+    const container = document.getElementById('embers');
+    for (let i = 0; i < 35; i++) {
+      const e = document.createElement('div');
+      e.className = 'ember';
+      e.style.setProperty('--x', Math.random() * 100 + 'vw');
+      e.style.setProperty('--dur', (6 + Math.random() * 10) + 's');
+      e.style.setProperty('--delay', (Math.random() * 12) + 's');
+      e.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+      container.appendChild(e);
+    }
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
